@@ -4,3 +4,18 @@ project(morphological_dilation LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(dilation_core
+    src/binary_image.cpp
+)
+
+target_include_directories(dilation_core PUBLIC include)
+
+if(MSVC)
+    target_compile_options(dilation_core PRIVATE /W4)
+else()
+    target_compile_options(
+        dilation_core
+        PRIVATE -Wall -Wextra -Wpedantic
+    )
+endif()

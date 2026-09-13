@@ -75,8 +75,8 @@ morphological_dilation-task/
 在项目根目录运行：
 
 ```bash
-cmake -S . -B build
-cmake --build build
+cmake -B build
+make -C build
 ```
 
 出现 `Built target dilation_cli` 表示构建成功，可执行文件位于：

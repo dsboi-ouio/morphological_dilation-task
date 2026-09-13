@@ -1,5 +1,8 @@
 #include "pipeline.hpp"
 
+#include "dilation.hpp"
+#include "erosion.hpp"
+
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -10,24 +13,37 @@
 
 namespace morphology {
 
-DilationPipeline::DilationPipeline()
-    : DilationPipeline(StructuringElement5x5::square()) {}
+MorphologyPipeline::MorphologyPipeline()
+    : MorphologyPipeline(MorphologyOperation::Dilation,
+                         StructuringElement5x5::square()) {}
 
-DilationPipeline::DilationPipeline(StructuringElement5x5 element)
-    : dilation_(std::move(element)) {}
+MorphologyPipeline::MorphologyPipeline(StructuringElement5x5 element)
+    : MorphologyPipeline(MorphologyOperation::Dilation,
+                         std::move(element)) {}
 
-BinaryImage DilationPipeline::process(const BinaryImage& input) const {
-    return dilation_.apply(input);
+MorphologyPipeline::MorphologyPipeline(MorphologyOperation operation,
+                                       StructuringElement5x5 element)
+    : operation_(operation), element_(std::move(element)) {}
+
+BinaryImage MorphologyPipeline::process(const BinaryImage& input) const {
+    switch (operation_) {
+        case MorphologyOperation::Dilation:
+            return Dilation5x5(element_).apply(input);
+        case MorphologyOperation::Erosion:
+            return Erosion5x5(element_).apply(input);
+    }
+
+    throw std::invalid_argument("unknown morphology operation");
 }
 
-void DilationPipeline::run(std::istream& input,
-                           std::ostream& output) const {
+void MorphologyPipeline::run(std::istream& input,
+                             std::ostream& output) const {
     const BinaryImage inputImage = readImage(input);
     const BinaryImage outputImage = process(inputImage);
     writeImage(outputImage, output);
 }
 
-BinaryImage DilationPipeline::readImage(std::istream& input) {
+BinaryImage MorphologyPipeline::readImage(std::istream& input) {
     BinaryImage::Matrix pixels;
     std::string line;
 
@@ -57,8 +73,8 @@ BinaryImage DilationPipeline::readImage(std::istream& input) {
     return BinaryImage(std::move(pixels));
 }
 
-void DilationPipeline::writeImage(const BinaryImage& image,
-                                  std::ostream& output) {
+void MorphologyPipeline::writeImage(const BinaryImage& image,
+                                    std::ostream& output) {
     for (std::size_t row = 0; row < image.rows(); ++row) {
         for (std::size_t column = 0; column < image.columns(); ++column) {
             if (column != 0) {

@@ -9,6 +9,7 @@ add_library(dilation_core
     src/binary_image.cpp
     src/structuring_element.cpp
     src/dilation.cpp
+    src/erosion.cpp
     src/pipeline.cpp
 )
 

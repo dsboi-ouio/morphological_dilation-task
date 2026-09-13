@@ -10,11 +10,14 @@ namespace {
 
 void printUsage(std::ostream& output, const char* programName) {
     output << "Usage: " << programName
-           << " <input-file> [square|disk]\n"
-           << "Default structuring element: square\n"
+           << " <input-file> [square|disk] [dilate|erode]\n"
+           << "Defaults: square, dilate\n"
            << "Examples:\n"
            << "  " << programName << " examples/input_12x12.txt\n"
-           << "  " << programName << " examples/input_12x12.txt disk\n";
+           << "  " << programName
+           << " examples/input_12x12.txt disk\n"
+           << "  " << programName
+           << " examples/input_12x12.txt disk erode\n";
 }
 
 }  // namespace
@@ -25,15 +28,23 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    if (argc != 2 && argc != 3) {
+    if (argc < 2 || argc > 4) {
         printUsage(std::cerr, argv[0]);
         return 2;
     }
 
-    const std::string elementName = argc == 3 ? argv[2] : "square";
+    const std::string elementName = argc >= 3 ? argv[2] : "square";
     if (elementName != "square" && elementName != "disk") {
         std::cerr << "Error: unknown structuring element: "
                   << elementName << '\n';
+        printUsage(std::cerr, argv[0]);
+        return 2;
+    }
+
+    const std::string operationName = argc == 4 ? argv[3] : "dilate";
+    if (operationName != "dilate" && operationName != "erode") {
+        std::cerr << "Error: unknown operation: "
+                  << operationName << '\n';
         printUsage(std::cerr, argv[0]);
         return 2;
     }
@@ -45,11 +56,15 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        const morphology::DilationPipeline pipeline(
+        const auto operation = operationName == "erode"
+            ? morphology::MorphologyOperation::Erosion
+            : morphology::MorphologyOperation::Dilation;
+
+        const morphology::MorphologyPipeline pipeline(
+            operation,
             elementName == "disk"
                 ? morphology::StructuringElement5x5::disk()
                 : morphology::StructuringElement5x5::square());
-
         pipeline.run(inputFile, std::cout);
         return 0;
     } catch (const std::exception& error) {

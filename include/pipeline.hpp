@@ -9,6 +9,9 @@ namespace morphology {
 
 class DilationPipeline {
 public:
+    DilationPipeline();
+    explicit DilationPipeline(StructuringElement5x5 element);
+
     [[nodiscard]] BinaryImage process(const BinaryImage& input) const;
 
     void run(std::istream& input,

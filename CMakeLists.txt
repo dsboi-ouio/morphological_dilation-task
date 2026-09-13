@@ -7,6 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(dilation_core
     src/binary_image.cpp
+    src/structuring_element.cpp
     src/dilation.cpp
     src/pipeline.cpp
 )

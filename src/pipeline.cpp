@@ -10,6 +10,12 @@
 
 namespace morphology {
 
+DilationPipeline::DilationPipeline()
+    : DilationPipeline(StructuringElement5x5::square()) {}
+
+DilationPipeline::DilationPipeline(StructuringElement5x5 element)
+    : dilation_(std::move(element)) {}
+
 BinaryImage DilationPipeline::process(const BinaryImage& input) const {
     return dilation_.apply(input);
 }
